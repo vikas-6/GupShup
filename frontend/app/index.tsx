@@ -1,17 +1,16 @@
-import { StatusBar, StyleSheet, View } from "react-native";
-import React, { useEffect } from "react";
 import { colors } from "@/constants/theme";
+import React from "react";
+import { StatusBar, StyleSheet, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import { useRouter } from "expo-router";
 
 const SplashScreen = () => {
-  const router = useRouter();
+  // const router = useRouter();
 
-  useEffect(() => {
-    setTimeout(() => {
-      router.replace("/(auth)/welcome");
-    }, 1500);
-  }, []);
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     router.replace("/(auth)/welcome");
+  //   }, 1500);
+  // }, []);
 
   return (
     <View style={styles.container}>

@@ -1,14 +1,17 @@
-import { StyleSheet } from 'react-native';
-import React from 'react';
+import { AuthProvider } from '@/contexts/authContext';
 import { Stack } from 'expo-router';
+import React from 'react';
+import { StyleSheet } from 'react-native';
 
+const StackLayout = () => {
+  return <Stack screenOptions={{ headerShown: false }} />
+};
 const RootLayout = () => {
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="(auth)/welcome" />
-    </Stack>
-  );
+    <AuthProvider>
+      <StackLayout />
+    </AuthProvider>
+  )
 };
 
 export default RootLayout;

@@ -1,20 +1,23 @@
-import { KeyboardAvoidingView, Platform, StyleSheet, View, ScrollView, Pressable, Alert } from 'react-native'
-import React, { useRef, useState } from 'react'
+import BackButton from '@/components/BackButton'
+import Button from '@/components/Button'
+import Input from '@/components/Input'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import Typo from '@/components/Typo'
 import { colors, radius, spacingX, spacingY } from '@/constants/theme'
-import BackButton from '@/components/BackButton'
-import Input from '@/components/Input'
-import * as Icons from 'phosphor-react-native'
+import { useAuth } from '@/contexts/authContext'
 import { verticalScale } from '@/utils/styling'
 import { useRouter } from 'expo-router'
-import Button from '@/components/Button'
+import * as Icons from 'phosphor-react-native'
+import React, { useRef, useState } from 'react'
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native'
 
 const Login = () => {
     const emailRef = useRef('');
     const passwordRef = useRef('');
     const [ isLoading, setIsLoading ] = useState(false);
     const router = useRouter();
+    
+    const { signIn } = useAuth();
 
   const handleSubmit = async () => {
     if(!emailRef.current || !passwordRef.current){
@@ -22,7 +25,13 @@ const Login = () => {
       return;
     }
     
-    setIsLoading(true);
+    try {
+      setIsLoading(true);
+      await signIn(emailRef.current, passwordRef.current);
+    } catch (error: any) {
+      Alert.alert('Login Error', error.message);
+      setIsLoading(false);
+    }
   };
 
   return (
