@@ -23,6 +23,7 @@ import Loading from "@/components/Loading";
 import { useRouter } from "expo-router";
 import { updateProfile, onUpdateProfile } from "@/socket/socketEvents";
 import * as ImagePicker from 'expo-image-picker';
+import { uploadFileToCloudinary } from "@/services/imageService";
 
 
 const ProfileModal = () => {
@@ -75,7 +76,7 @@ const ProfileModal = () => {
     console.log(result);
 
     if (!result.canceled) {
-      setUserData({ ...userData, avatar: result.assets[0].uri });
+      setUserData({ ...userData, avatar: { uri: result.assets[0].uri } });
     }
   };
 
@@ -95,7 +96,7 @@ const ProfileModal = () => {
     ]);
   };
 
-  const onsubmit = () => {
+  const onsubmit = async () => {
     let { name, avatar } = userData;
     if (!name) {
       Alert.alert("User", "Please enter your name");
@@ -107,8 +108,22 @@ const ProfileModal = () => {
       avatar,
     };
 
-    setLoading(true);
+    if(avatar && avatar?.uri){
+      setLoading(true);
+      const res = await uploadFileToCloudinary(avatar, "profiles");
+      // console.log('result:', res);
 
+      if (res.success) {
+        data.avatar = res.data;
+      } else {
+        Alert.alert("User", res.msg);
+        setLoading(false);
+        return;
+      }
+    }
+
+
+    setLoading(true);
     updateProfile(data);
   };
 
@@ -127,7 +142,7 @@ const ProfileModal = () => {
 
         <ScrollView contentContainerStyle={styles.form}>
           <View style={styles.avatarContainer}>
-            <Avatar uri={userData.avatar} size={170} />
+            <Avatar uri={userData.avatar?.uri || userData.avatar} size={170} />
             <TouchableOpacity style={styles.editIcon} onPress={onPickImage}>
               <Icons.PencilIcon
                 size={verticalScale(20)}
