@@ -48,3 +48,37 @@ export const onUpdateProfile = (callback: (data: any) => void, off: boolean = fa
     socket.on("updateProfileError", callback);
   }
 };
+
+export const getContacts = (payload: any, off: boolean = false) => {
+  const socket = getSocket();
+  if (!socket) {
+    console.log("Socket not connected")
+    return;
+  }
+
+  if (off) {
+    socket.off("getContacts", payload);
+  } else if (typeof payload === "function") {
+    socket.on("getContacts", payload);
+  } else{
+    socket.emit("getContacts", payload);
+  }
+}; 
+
+export const newConversation = (payload: any, off: boolean = false) => {
+  const socket = getSocket();
+  if (!socket) {
+    console.log("Socket not connected")
+    return;
+  }
+
+  if (off) {
+    socket.off("newConversation", payload);
+    socket.off("newConversationError", payload);
+  } else if (typeof payload === "function") {
+    socket.on("newConversation", payload);
+    socket.on("newConversationError", payload);
+  } else{
+    socket.emit("newConversation", payload);
+  }
+}; 

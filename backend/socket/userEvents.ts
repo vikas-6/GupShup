@@ -1,5 +1,5 @@
 import { Server, Socket } from "socket.io";
-import User from "../models/User";
+import User from "../modals/User";
 import { generateToken } from "../utils/tokens";
 import { UserProps } from "../types";
 
@@ -37,7 +37,12 @@ export function registerUserEvents(io: Server, socket: Socket) {
         }
 
         // get token with updated value
-        const newToken = generateToken(updatedUser);
+        const newToken = generateToken({
+          _id: updatedUser._id.toString(),
+          email: updatedUser.email,
+          name: updatedUser.name,
+          avatar: updatedUser.avatar
+        } as unknown as UserProps);
 
         socket.emit("updateProfileSuccess", {
           success: true,
@@ -53,4 +58,46 @@ export function registerUserEvents(io: Server, socket: Socket) {
       }
     }
   );
+
+  // Fetch contacts when user connects
+  socket.on("getContacts", async () => {
+    try {
+      const currentUserId = socket.data.userId;
+      if (!currentUserId) {
+        socket.emit("getContacts", {
+          success: false,
+          msg: "Unauthorized",
+        });
+        return;
+      }
+
+      const users = await User.find(
+        { _id: { $ne: currentUserId } },
+        { password: 0 } // exclude password field
+      ).lean(); // will fetch js objects
+
+      const contacts = users.map((user) => ({
+        id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar || "",
+      }));
+
+      socket.emit("getContacts", {
+        success: true,
+        data: contacts,
+      });
+    } catch (error: any) {
+      console.log("getContacts error: ", error);
+      socket.emit("getContacts", {
+        success: false,
+        msg: "Error getting contacts",
+      });
+    }
+  });
+
+  socket.on("disconnect", async () => {
+    // Don't emit events during disconnect as the socket is already disconnected
+    console.log("User disconnected:", socket.data.userId);
+  });
 }
